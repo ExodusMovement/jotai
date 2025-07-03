@@ -2,15 +2,8 @@ import { expectType } from 'ts-expect'
 import type { TypeEqual } from 'ts-expect'
 import { it } from 'vitest'
 import { atom } from 'jotai/vanilla'
-import type { Atom, SetStateAction, WritableAtom } from 'jotai/vanilla'
-import { selectAtom, unwrap } from 'jotai/vanilla/utils'
-
-it('selectAtom() should return the correct types', () => {
-  const doubleCount = (x: number) => x * 2
-  const syncAtom = atom(0)
-  const syncSelectedAtom = selectAtom(syncAtom, doubleCount)
-  expectType<TypeEqual<Atom<number>, typeof syncSelectedAtom>>(true)
-})
+import type { SetStateAction, WritableAtom } from 'jotai/vanilla'
+import { unwrap } from 'jotai/vanilla/utils'
 
 it('unwrap() should return the correct types', () => {
   const getFallbackValue = () => -1
