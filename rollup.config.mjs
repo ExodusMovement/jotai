@@ -25,8 +25,7 @@ export default {
   external,
   plugins: [
     replace({
-      'import.meta.env?.MODE':
-        '(import.meta.env ? import.meta.env.MODE : undefined)',
+      'import.meta.env?.MODE': 'process.env.NODE_ENV',
       delimiters: ['\\b', '\\b(?!(\\.|/))'],
       preventAssignment: true,
     }),
