@@ -1,0 +1,47 @@
+import type { Atom } from '../vanilla/atom.ts'
+import {
+  INTERNAL_getBuildingBlocksRev1 as getBuildingBlocks,
+  INTERNAL_initializeStoreHooks as initializeStoreHooks,
+} from '../vanilla/internals.ts'
+import { type Effect, atomEffect } from './atomEffect.ts'
+
+export function withAtomEffect<T extends Atom<unknown>>(
+  targetAtom: T,
+  effect: Effect,
+): T & { effect: Effect } {
+  const effectAtom = atomEffect((get, set) => {
+    const getter = ((a) =>
+      a === targetWithEffect ? get(targetAtom) : get(a)) as typeof get
+    getter.peek = get.peek
+    return targetWithEffect.effect.call(targetAtom, getter, set)
+  })
+
+  const descriptors = Object.getOwnPropertyDescriptors(targetAtom)
+  descriptors.read.value = targetAtom.read.bind(targetAtom)
+  if ('write' in targetAtom && typeof targetAtom.write === 'function') {
+    descriptors.write!.value = targetAtom.write.bind(targetAtom)
+  }
+
+  // avoid reading `init` to preserve lazy initialization
+  const targetPrototype = Object.getPrototypeOf(targetAtom)
+  const targetWithEffect: T & { effect: Effect } = Object.create(
+    targetPrototype,
+    descriptors,
+  )
+
+  targetWithEffect.unstable_onInit = (store) => {
+    const buildingBlocks = getBuildingBlocks(store)
+    const storeHooks = initializeStoreHooks(buildingBlocks[6])
+    let unsub: () => void
+    storeHooks.m.add(targetWithEffect, function mountEffect() {
+      unsub = store.sub(effectAtom, () => {})
+    })
+    storeHooks.u.add(targetWithEffect, function unmountEffect() {
+      unsub!()
+    })
+  }
+
+  targetWithEffect.effect = effect
+
+  return targetWithEffect
+}
