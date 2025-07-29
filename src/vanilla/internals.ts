@@ -354,10 +354,11 @@ const createStoreHookForAtoms = (): StoreHookForAtoms => {
 
 const initializeStoreHooks = (storeHooks: StoreHooks): Required<StoreHooks> => {
   type SH = { -readonly [P in keyof StoreHooks]: StoreHooks[P] }
-  ;(storeHooks as SH).c ||= createStoreHookForAtoms()
-  ;(storeHooks as SH).m ||= createStoreHookForAtoms()
-  ;(storeHooks as SH).u ||= createStoreHookForAtoms()
-  ;(storeHooks as SH).f ||= createStoreHook()
+  const instance = storeHooks as SH
+  instance.c = instance.c || createStoreHookForAtoms()
+  instance.m = instance.m || createStoreHookForAtoms()
+  instance.u = instance.u || createStoreHookForAtoms()
+  instance.f = instance.f || createStoreHook()
   return storeHooks as Required<StoreHooks>
 }
 
