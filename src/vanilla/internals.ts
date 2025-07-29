@@ -474,7 +474,7 @@ const buildStore = (
         mountCallbacks.size
       )
       if (errors.length) {
-        throw new AggregateError(errors)
+        throw errors[0] as Error
       }
     })
 
